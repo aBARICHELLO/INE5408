@@ -1,6 +1,6 @@
 //  Copyright [2017] <Barichello>
-// 77.27/100.00
 
+// 81.82/100.0
 #ifndef STRUCTURES_ARRAY_LIST_H
 #define STRUCTURES_ARRAY_LIST_H
 
@@ -61,7 +61,7 @@ class ArrayList {
     T pop(std::size_t index) {
         if (empty())
             throw std::out_of_range("Empty!!");
-        T& element = contents[index];
+        T element = contents[index];
         move_down(size(), index);
         size_--;
         return element;
@@ -109,11 +109,11 @@ class ArrayList {
 
     //!  Finds //
     std::size_t find(const T& data) const {
-        for (auto a = 1; a < size(); ++a) {
-            if (contents[a] == data)
+        for (auto a = 0; a <= size(); ++a) {
+            if (contents[a] ==  data)
                 return a;
         }
-        return -1;
+        return 10;
     }
 
     //!  Arraylist current size //
