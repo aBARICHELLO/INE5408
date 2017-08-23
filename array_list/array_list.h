@@ -1,6 +1,6 @@
 //  Copyright [2017] <Barichello>
 
-// 81.82/100.0
+//  95.45/100.0
 #ifndef STRUCTURES_ARRAY_LIST_H
 #define STRUCTURES_ARRAY_LIST_H
 
@@ -42,27 +42,30 @@ class ArrayList {
 
     //!  Inserts an element at an given position //
     void insert(const T& data, int index) {
-        if (full())
-            throw std::out_of_range("Full!");
-        else if (index >= max_size() || index < 0)
-            throw std::out_of_range("Not in range");
-        move_up(size(), index);
+        if (full() || index < 0 || index >= max_size())
+            throw std::out_of_range("Out of range");
+        move_up(index);
         contents[index] = data;
         size_++;
     }
 
-    //!   //
+    //!  Inserts the element by ordering the array //
     void insert_sorted(const T& data) {
+        int index = 0;
+        while (index <= size() && data > contents[index]) {
+            index++;
+        }
+        insert(data, index);
     }
 
     /*! Removes element from given index.
         Function moves one down starts shifting 
         from index*/
     T pop(std::size_t index) {
-        if (empty())
-            throw std::out_of_range("Empty!!");
+        if (empty() || index < 0 || index >= size())
+            throw std::out_of_range("Out of range");
         T element = contents[index];
-        move_down(size(), index);
+        move_down(index);
         size_--;
         return element;
     }
@@ -71,7 +74,7 @@ class ArrayList {
     T pop_back() {
         if (empty())
             throw std::out_of_range("Empty!");
-        return contents[size_--];
+        return contents[--size_];
     }
 
     //!  Remove selement from front //
@@ -147,18 +150,19 @@ class ArrayList {
 
     //!   //
     const T& operator[](std::size_t index) const {
+        return contents[index];
     }
 
     /*! Moves elements down */
-    void move_down(std::size_t position, std::size_t index) {
-        for (auto i = index; i < size(); ++i) {
-            contents[i] = std::move(contents[1+1]);
+    void move_down(std::size_t position) {
+        for (int i = position; i < size(); ++i) {
+			contents[i] = contents[i+1];
         }
     }
 
     /*! Moves the elements up */
-    void move_up(std::size_t position, std::size_t index) {
-        for (auto i = size(); i > index; --i) {
+    void move_up(std::size_t position) {
+        for (auto i = size(); i > position; --i) {
             contents[i] = std::move(contents[i-1]);
         }
     }
