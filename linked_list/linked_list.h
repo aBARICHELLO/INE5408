@@ -15,13 +15,20 @@ class LinkedList {
     LinkedList() {}
 
     //! Destructor
-    ~LinkedList() {}
+    ~LinkedList() {
+        clear();
+    }
 
     //! Clears the list
     void clear() {
-        while (!empty()) {
-            pop_front();
+        auto current_node = head;
+
+        for (auto i = 0u; i < size(); ++i) {
+            auto aux = current_node;
+            current_node = current_node->next();
+            delete aux;
         }
+        size_ = 0;
     }
 
     //! Inserts an element at size()
@@ -115,16 +122,15 @@ class LinkedList {
             throw std::out_of_range("Empty!");
         }
 
-        auto end_data = end()->data();
         auto current_node = head;
-
-        while (current_node->next() != nullptr) {
+        for (auto i = 0u; i < size()-1; ++i) {
             current_node = current_node->next();
         }
 
-        current_node = nullptr;
+        current_node->next(nullptr);
+        auto end_data = end()->data();
+        delete end();
         --size_;
-        delete current_node;
         return end_data;
     }
 
