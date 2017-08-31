@@ -57,7 +57,7 @@ EOF
 }
 
 build() {
-    g++ -o "$1" "$1".cpp "${@:2}" -std=c++$std
+    g++ -o "$1" "$1".cpp "${@:2}" -std=c++$std -g
 }
 
 check-gtest() {
