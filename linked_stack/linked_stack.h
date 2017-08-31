@@ -89,24 +89,9 @@ class LinkedStack {
             return data_;
         }
 
-        //! Getter const
-        const T& data() const {
-            return data_;
-        }
-
         //! Next node
         Node* next() {
             return next_;
-        }
-
-        //! Getter const, next
-        const Node* next() const {
-            return next_;
-        }
-
-        //! Setter next
-        void next(Node* node) {
-            next_ = node;
         }
 
      private:
