@@ -6,58 +6,225 @@
 #include <stdexcept>
 
 namespace structures {
-    
+
 template<typename T>
+//! DoublyLinkedList class
 class DoublyLinkedList {
  public:
-    DoublyLinkedList() {}
+    //! Constructor
+    DoublyLinkedList() = default;
+
+    //! Destructor
+    ~DoublyLinkedList() {
+        clear();
+    }
+
+    //! Clears the list
+    void clear() {
+        auto current_node = head;
+
+        for (auto i = 0u; i < size(); ++i) {
+            auto aux = current_node;
+            current_node = current_node->next();
+            delete aux;
+        }
+        size_ = 0;
+    }
+
+    //! Push back
+    void push_back(const T& data) {
+        auto new_node = new Node{data};
+        if (empty()) {
+            head = new_node;
+            tail = new_node;
+        }
+
+        auto old_tail = tail;
+        new_node->prev(old_tail);
+        old_tail->next(new_node);
+        tail = new_node;
+        ++size_;
+    }
     
-    ~DoublyLinkedList() {}
+    //! Push front
+    void push_front(const T& data) {
+        auto new_node = new Node{data};
+        if (empty()) {
+            head = new_node;
+            tail = new_node;
+        }
+
+        auto old_head = head;
+        head = new_node;
+        new_node->next(old_head);
+        old_head->prev(head);
+
+        ++size_;
+    }
     
-    void clear();
+    //! Inserts at given position
+    void insert(const T& data, std::size_t index) {
+        if (empty()) {
+            return push_front(data);
+        } else if (index < 0 || index > size()) {
+            throw std::out_of_range("Index out of range!");
+        }
 
-    void push_back(const T& data); // insere no fim
-    void push_front(const T& data); // insere no início
-    void insert(const T& data, std::size_t index); // insere na posição
-    void insert_sorted(const T& data); // insere em ordem
+        auto previous_node = head;
+        for (auto i = 0u; i < index-1; ++i) {
+            previous_node = previous_node->next();
+        }
 
-    T pop(std::size_t index); // retira da posição
-    T pop_back(); // retira do fim
-    T pop_front(); // retira do início
-    void remove(const T& data); // retira específico
+        auto next_node = previous_node->next();
+        auto new_node = new Node{data, previous_node, next_node};
+        
+        previous_node->next(new_node);
+        next_node->prev(new_node);
 
+        ++size_;
+    }
+    
+    //! Insert sorted
+    void insert_sorted(const T& data) {
+        push_front(data);
+    }
+
+    //! Pops at a given position
+    T pop(std::size_t index) {
+
+    }
+
+    //! Pop at size()
+    T pop_back() {
+
+    }
+
+    //! Pop at 0
+    T pop_front() {
+
+    }
+
+    //! Removes element from the list
+    void remove(const T& data) {
+
+    }
+
+    //! Empty
     bool empty() const {
         return size_ == 0;
     }
 
-    bool contains(const T& data); const // contém
+    //! Contains a specific element
+    bool contains(const T& data) const {
+        auto current_node = head;
+        auto index = 0u;
 
-    T& at(std::size_t index); // acesso a um elemento (checando limites)
-    const T& at(std::size_t index) const; // getter constante a um elemento
+        while (current_node->data() != data) {
+            current_node = current_node->next();
+            ++index;
+            if (current_node == nullptr) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-    std::size_t find(const T& data); const // posição de um dado
-    std::size_t size() const; // tamanho
- 
+    //! Acess the element at the given index
+    T& at(std::size_t index) {
+        if (index < 0 || index > size()) {
+            throw std::out_of_range("Wrong index!");
+        }
+        
+        auto current_node = head;
+        for (auto i = 0u; i < index; i++) {
+            current_node = current_node->next();
+        }
+
+        return current_node->data();
+    }
+
+    //! At
+    const T& at(std::size_t index) const {
+        if (index < 0 || index > size()) {
+            throw std::out_of_range("Wrong index!");
+        }
+
+        auto current_node = head;
+        for (auto i = 0u; i < index; i++) {
+            current_node = current_node->next();
+        }
+
+        return current_node->data();
+    }
+
+    //! Returns specific element index
+    std::size_t find(const T& data) const {
+        auto current_node = head;
+        auto index = 0u;
+
+        while (current_node->data() != data) {
+            current_node = current_node->next();
+            ++index;
+            if (current_node == nullptr) {
+                return 10;
+            }
+        }
+        return index;
+    }
+    
+    //! Returns std::size_t size_
+    std::size_t size() const {
+        return size_;
+    }
+
  private:
     class Node {
      public:
-        Node(const T& data);
-        Node(const T& data, Node* next);
-        Node(const T& data, Node* prev, Node* next);
+        //! Constructor
+        Node(const T& data, Node* prev=nullptr, Node* next=nullptr):
+            data_{data}
+        {}
 
-        T& data();
-        const T& data() const;
+        //! Return data w/o const
+        T& data() {
+            return data_;
+        }
 
-        Node* prev();
-        const Node* prev() const;
+        //! Return data const
+        const T& data() const {
+            return data_;
+        }
 
-        void prev(Node* node);
+        //! Setter for previous node
+        void prev(Node* node) {
+            prev_ = node;
+        }
 
-        Node* next();
-        const Node* next() const;
+        //! Return prev w/o const
+        Node* prev() {
+            return prev_;
+        }
 
-        void next(Node* node);
-    
+        //! const Getter for previous node
+        const Node* prev() const {
+            return prev_;
+        }
+
+        //! Setter for next node
+        void next(Node* node) {
+            next_ = node;
+        }
+
+        //! Getter for next node w/o const
+        Node* next() {
+            return next_;
+        }
+
+        //! const Getter for next node
+        const Node* next() const {
+            return next_;
+        }
+
      private:
         T data_;
         Node* prev_;
@@ -65,6 +232,7 @@ class DoublyLinkedList {
     };
 
     Node* head;
+    Node* tail;
     std::size_t size_;
 };
 
