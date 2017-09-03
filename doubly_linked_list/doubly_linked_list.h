@@ -37,21 +37,26 @@ class DoublyLinkedList {
         if (empty()) {
             head = new_node;
             tail = new_node;
+            ++size_;
+            return;
         }
 
         auto old_tail = tail;
+        tail = new_node;
         new_node->prev(old_tail);
         old_tail->next(new_node);
-        tail = new_node;
+
         ++size_;
     }
-    
+
     //! Push front
     void push_front(const T& data) {
         auto new_node = new Node{data};
         if (empty()) {
             head = new_node;
             tail = new_node;
+            ++size_;
+            return;
         }
 
         auto old_head = head;
@@ -61,13 +66,40 @@ class DoublyLinkedList {
 
         ++size_;
     }
-    
+
     //! Inserts at given position
     void insert(const T& data, std::size_t index) {
-        if (empty()) {
+        if (empty() || index == 0) {
             return push_front(data);
+        } else if (index == size()) {
+            return push_back(data);
         } else if (index < 0 || index > size()) {
             throw std::out_of_range("Index out of range!");
+        }
+
+        auto previous_node = head;
+        for (auto i = 0; i < index-1; ++i) {
+            previous_node = previous_node->next();
+        }
+
+        auto next_node = previous_node->next();
+        auto new_node = new Node{data, previous_node, next_node};
+
+        previous_node->next(new_node);
+        next_node->prev(new_node);
+
+        ++size_;
+    }
+
+    //! Insert sorted
+    void insert_sorted(const T& data) {
+        // TODO
+    }
+
+    //! Pops at a given position
+    T pop(std::size_t index) {
+        if (empty() || index < 0 || index > size()) {
+            throw std::out_of_range("Out of range!");
         }
 
         auto previous_node = head;
@@ -75,38 +107,53 @@ class DoublyLinkedList {
             previous_node = previous_node->next();
         }
 
-        auto next_node = previous_node->next();
-        auto new_node = new Node{data, previous_node, next_node};
-        
-        previous_node->next(new_node);
-        next_node->prev(new_node);
+        auto delete_node = previous_node->next();
+        auto next_node = delete_node->next();
 
-        ++size_;
-    }
-    
-    //! Insert sorted
-    void insert_sorted(const T& data) {
-        push_front(data);
-    }
+        auto delete_data = delete_node->data();
 
-    //! Pops at a given position
-    T pop(std::size_t index) {
+        previous_node->next(next_node);
+        next_node->prev(previous_node);
 
+        --size_;
+        delete delete_node;
+        return delete_data;
     }
 
     //! Pop at size()
     T pop_back() {
+        if (empty()) {
+            throw std::out_of_range("Empty!");
+        }
 
+        auto old_tail = tail;
+        auto old_data = tail->data();
+        tail = tail->prev();
+
+        --size_;
+        delete old_tail;
+        return old_data;
     }
 
     //! Pop at 0
     T pop_front() {
+        if (empty()) {
+            throw std::out_of_range("Empty!");
+        }
 
+        auto old_head = head;
+        auto old_data = head->data();
+        head = head->next();
+
+        --size_;
+        delete old_head;
+        return old_data;
     }
 
     //! Removes element from the list
     void remove(const T& data) {
-
+        auto index = find(data);
+        pop(index);
     }
 
     //! Empty
@@ -117,16 +164,14 @@ class DoublyLinkedList {
     //! Contains a specific element
     bool contains(const T& data) const {
         auto current_node = head;
-        auto index = 0u;
 
-        while (current_node->data() != data) {
-            current_node = current_node->next();
-            ++index;
-            if (current_node == nullptr) {
-                return false;
+        for (auto i = 0u; i < size()-1; ++i) {
+            if (current_node->data() == data) {
+                return true;
             }
+            current_node = current_node->next();
         }
-        return true;
+        return false;
     }
 
     //! Acess the element at the given index
@@ -134,7 +179,7 @@ class DoublyLinkedList {
         if (index < 0 || index > size()) {
             throw std::out_of_range("Wrong index!");
         }
-        
+
         auto current_node = head;
         for (auto i = 0u; i < index; i++) {
             current_node = current_node->next();
@@ -160,18 +205,16 @@ class DoublyLinkedList {
     //! Returns specific element index
     std::size_t find(const T& data) const {
         auto current_node = head;
-        auto index = 0u;
 
-        while (current_node->data() != data) {
-            current_node = current_node->next();
-            ++index;
-            if (current_node == nullptr) {
-                return 10;
+        for (auto i = 0u; i < size(); ++i) {
+            if (current_node->data() == data) {
+                return i;
             }
+            current_node = current_node->next();
         }
-        return index;
+        return 10;
     }
-    
+
     //! Returns std::size_t size_
     std::size_t size() const {
         return size_;
@@ -181,7 +224,8 @@ class DoublyLinkedList {
     class Node {
      public:
         //! Constructor
-        Node(const T& data, Node* prev=nullptr, Node* next=nullptr):
+        explicit Node(const T& data, Node* prev = nullptr,
+            Node* next = nullptr):
             data_{data}
         {}
 
@@ -236,6 +280,6 @@ class DoublyLinkedList {
     std::size_t size_;
 };
 
-} // namespace structures
+}  // namespace structures
 
 #endif
