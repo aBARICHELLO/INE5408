@@ -31,74 +31,77 @@ class DoublyLinkedList {
         size_ = 0;
     }
 
-    //! Push back
-    void push_back(const T& data) {
-        auto new_node = new Node{data};
-        if (empty()) {
-            head = new_node;
-            tail = new_node;
-            ++size_;
-            return;
+    //! Inserts at given position
+    void insert(const T& data, std::size_t index) {
+        if (index < 0 || index > size()) {
+            throw std::out_of_range("Index out of range!");
         }
 
-        auto old_tail = tail;
-        tail = new_node;
-        new_node->prev(old_tail);
-        old_tail->next(new_node);
+        if (empty() || index == 0) {
+            return push_front(data);
+        }
 
+        if (index == size()) {
+            return push_back(data);
+        }
+
+        auto previous_node = head;
+        for (auto i = 0u; i < index-1; ++i) {
+            previous_node = previous_node->next();
+        }
+
+        auto new_node = new Node{data, previous_node, previous_node->next()};
+        previous_node->next()->prev(new_node);
+        previous_node->next(new_node);
         ++size_;
     }
 
     //! Push front
     void push_front(const T& data) {
         auto new_node = new Node{data};
+        new_node->next(head);
         if (empty()) {
-            head = new_node;
             tail = new_node;
-            ++size_;
-            return;
+        } else {
+            head->prev(new_node);
         }
 
-        auto old_head = head;
         head = new_node;
-        new_node->next(old_head);
-        old_head->prev(head);
-
         ++size_;
     }
 
-    //! Inserts at given position
-    void insert(const T& data, std::size_t index) {
-        if (empty() || index == 0) {
-            return push_front(data);
-        } else if (index == size()) {
-            return push_back(data);
-        } else if (index < 0 || index > size()) {
-            throw std::out_of_range("Index out of range!");
+    //! Push back
+    void push_back(const T& data) {
+        auto new_node = new Node{data};
+        new_node->prev(tail);
+        if (empty()) {
+            head = new_node;
+        } else {
+            tail->next(new_node);
         }
 
-        auto previous_node = head;
-        for (auto i = 0; i < index-1; ++i) {
-            previous_node = previous_node->next();
-        }
-
-        auto next_node = previous_node->next();
-        auto new_node = new Node{data, previous_node, next_node};
-
-        previous_node->next(new_node);
-        next_node->prev(new_node);
-
+        tail = new_node;
         ++size_;
     }
 
     //! Insert sorted
     void insert_sorted(const T& data) {
-        // TODO
+        if (empty()) {
+            return push_front(data);
+        }
+        auto current_node = head;
+        for (auto i = 0u; i < size(); ++i) {
+            auto node_data = current_node->data();
+            if (data > node_data) {
+                insert(data, i);
+            }
+            current_node = current_node->next();
+        }
     }
 
     //! Pops at a given position
     T pop(std::size_t index) {
-        if (empty() || index < 0 || index > size()) {
+        if (empty() || index < 0 || index >= size()) {
             throw std::out_of_range("Out of range!");
         }
 
@@ -224,9 +227,19 @@ class DoublyLinkedList {
     class Node {
      public:
         //! Constructor
-        explicit Node(const T& data, Node* prev = nullptr,
-            Node* next = nullptr):
+        explicit Node(const T& data):
             data_{data}
+        {}
+
+        Node(const T& data, Node* next):
+            data_{data},
+            next_{next}
+        {}
+
+        Node(const T& data, Node* prev, Node* next):
+            data_{data},
+            prev_{prev},
+            next_{next}
         {}
 
         //! Return data w/o const
@@ -239,34 +252,34 @@ class DoublyLinkedList {
             return data_;
         }
 
-        //! Setter for previous node
-        void prev(Node* node) {
-            prev_ = node;
-        }
-
-        //! Return prev w/o const
+        //! Return prev
         Node* prev() {
             return prev_;
         }
 
-        //! const Getter for previous node
+        //! Return prev const
         const Node* prev() const {
             return prev_;
         }
 
-        //! Setter for next node
-        void next(Node* node) {
-            next_ = node;
+        //! Prev setter
+        void prev(Node* node) {
+            prev_ = node;
         }
 
-        //! Getter for next node w/o const
+        //! Return next
         Node* next() {
             return next_;
         }
 
-        //! const Getter for next node
+        //! Return next const
         const Node* next() const {
             return next_;
+        }
+
+        //! Next setter
+        void next(Node* node) {
+            next_ = node;
         }
 
      private:
