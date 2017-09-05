@@ -24,9 +24,9 @@ class DoublyLinkedList {
         auto current_node = head;
 
         for (auto i = 0u; i < size(); ++i) {
-            auto aux = current_node;
+            auto aux_node = current_node;
             current_node = current_node->next();
-            delete aux;
+            delete aux_node;
         }
         size_ = 0;
     }
@@ -89,14 +89,14 @@ class DoublyLinkedList {
         if (empty()) {
             return push_front(data);
         }
+
         auto current_node = head;
-        for (auto i = 0u; i < size(); ++i) {
-            auto node_data = current_node->data();
-            if (data > node_data) {
-                insert(data, i);
-            }
+        std::size_t index = 0;
+        while (data > current_node->data() && index < size()) {
             current_node = current_node->next();
+            ++index;
         }
+        insert(data, index);
     }
 
     //! Pops at a given position
