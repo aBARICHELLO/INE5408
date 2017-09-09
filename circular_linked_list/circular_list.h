@@ -129,8 +129,8 @@ class CircularList {
             current_node = current_node->next();
         }
 
-        auto end_data = current_node->next()->data();
         current_node->next(head);
+        auto end_data = current_node->data();
 
         delete current_node;
         --size_;
