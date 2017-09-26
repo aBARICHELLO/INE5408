@@ -43,7 +43,7 @@ class ArrayList {
     //!  Inserts an element at an given position //
     void insert(const T& data, int index) {
         if (full() || index < 0 || index >= max_size())
-            throw std::out_of_range("Out of range");
+            throw std::out_of_range("Out of range!");
         move_up(index);
         contents[index] = data;
         size_++;
@@ -51,9 +51,18 @@ class ArrayList {
 
     //!  Inserts the element by ordering the array //
     void insert_sorted(const T& data) {
-        int index = 0;
-        while (index <= size() && data > contents[index]) {
-            index++;
+        if (empty()) {
+            return push_front(data);
+        }
+
+        if (full()) {
+            throw std::out_of_range("Full!");
+        }
+
+        
+        auto index = 0u;
+        while (index < size() && data > contents[index]) {
+            ++index;
         }
         insert(data, index);
     }
