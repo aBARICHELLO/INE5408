@@ -5,10 +5,7 @@
 #include <cstdint>
 #include <stdexcept>
 
-namespace structures {
-
 template<typename T>
-//! Circular List class
 class CircularList {
  public:
     //! Constructor
@@ -244,7 +241,5 @@ class CircularList {
     Node* head{nullptr};
     std::size_t size_{0u};
 };
-
-}  // namespace structures
 
 #endif
