@@ -1,6 +1,6 @@
 //  Copyright [2017] <Barichello>
 
-//  95.45/100.0
+// 100.0
 #ifndef STRUCTURES_ARRAY_LIST_H
 #define STRUCTURES_ARRAY_LIST_H
 
@@ -59,7 +59,6 @@ class ArrayList {
             throw std::out_of_range("Full!");
         }
 
-        
         auto index = 0u;
         while (index < size() && data > contents[index]) {
             ++index;
