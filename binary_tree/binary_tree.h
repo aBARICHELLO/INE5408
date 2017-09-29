@@ -16,35 +16,35 @@ class BinaryTree {
     //! Destructor
     ~BinaryTree() {
         while (!empty()) {
-            remove(root->data);
+            remove(root->node_data);
         }
     }
 
     //! Insert
-    void insert(const T& data) {
+    void insert(const T& node_data) {
         if (empty()) {
-            root = new Node(data);
+            root = new Node(node_data);
         } else {
-            root->insert(data);
+            root->insert(node_data);
         }
         ++size_;
     }
 
     //! Remove
-    void remove(const T& data) {
+    void remove(const T& node_data) {
         if (empty()) {
             throw std::out_of_range("Empty!");
         }
-        root->remove(data);
+        root->remove(node_data);
         --size_;
     }
 
     //! Contains
-    bool contains(const T& data) const {
+    bool contains(const T& node_data) const {
         if (empty()) {
             return false;
         }
-        return root->contains(data);
+        return root->contains(node_data);
     }
 
     //! Empty
@@ -87,45 +87,46 @@ class BinaryTree {
  private:
     struct Node {
         //! Node
-        explicit Node(const T& data) {
-            this->data = data;
+        explicit Node(const T& node_data) {
+            this->node_data = node_data;
         }
 
         //! Insert
-        void insert(const T& data_) {
-            if (data_ <= data) {
+        void insert(const T& data) {
+            if (data <= node_data) {
                 if (left == nullptr) {
-                    left = new Node(data_);
+                    left = new Node(data);
                 } else {
-                    left->insert(data_);
+                    left->insert(data);
                 }
             } else {
                 if (right == nullptr) {
-                    right = new Node(data_);
+                    right = new Node(data);
                 } else {
-                    right->insert(data_);
+                    right->insert(data);
                 }
             }
         }
 
         //! Remove
-        bool remove(const T& data_) {
+        bool remove(const T& data) {
             return true;
         }
 
         //! Contains
-        bool contains(const T& data_) const {
-            if (data_ < data) {
-                return left == nullptr ? false : left->contains(data);
-            } else if (data_ > data) {
+        bool contains(const T& data) const {
+            if (data < node_data) {
+                return left  == nullptr ? false : left->contains(data);
+            } else if (data > node_data) {
                 return right == nullptr ? false : right->contains(data);
+            } else {
+                return true;
             }
-            return true;
         }
 
         //! Pre order
         void pre_order(std::vector<T>& v) const {
-            v.push_back(data);
+            v.push_back(node_data);
             if (left) {
                 left->pre_order(v);
             }
@@ -139,7 +140,7 @@ class BinaryTree {
             if (left) {
                 left->pre_order(v);
             }
-            v.push_back(data);
+            v.push_back(node_data);
             if (right) {
                 right->pre_order(v);
             }
@@ -153,10 +154,10 @@ class BinaryTree {
             if (right) {
                 right->pre_order(v);
             }
-            v.push_back(data);
+            v.push_back(node_data);
         }
 
-        T data;
+        T node_data;
         Node* left{nullptr};
         Node* right{nullptr};
     };
