@@ -16,7 +16,7 @@ class BinaryTree {
     //! Destructor
     ~BinaryTree() {
         while (!empty()) {
-            remove(root->data());
+            remove(root->data);
         }
     }
 
@@ -35,12 +35,15 @@ class BinaryTree {
         if (empty()) {
             throw std::out_of_range("Empty!");
         }
-
-
+        root->remove(data);
+        --size_;
     }
 
     //! Contains
     bool contains(const T& data) const {
+        if (empty()) {
+            return false;
+        }
         return root->contains(data);
     }
 
@@ -90,24 +93,24 @@ class BinaryTree {
 
         //! Insert
         void insert(const T& data_) {
-            if (data < data_) {
+            if (data_ <= data) {
                 if (left == nullptr) {
-                    left = new Node(data);
+                    left = new Node(data_);
                 } else {
-                    left->insert(data);
+                    left->insert(data_);
                 }
             } else {
                 if (right == nullptr) {
-                    right = new Node(data);
+                    right = new Node(data_);
                 } else {
-                    right->insert(data);
+                    right->insert(data_);
                 }
             }
         }
 
         //! Remove
         bool remove(const T& data_) {
-            // First find the node:
+            return true;
         }
 
         //! Contains
@@ -154,14 +157,14 @@ class BinaryTree {
         }
 
         T data;
-        Node* left;
-        Node* right;
+        Node* left{nullptr};
+        Node* right{nullptr};
     };
 
     Node* root;
     std::size_t size_;
 };
 
-} // namespace structures
+}  // namespace structures
 
 #endif
