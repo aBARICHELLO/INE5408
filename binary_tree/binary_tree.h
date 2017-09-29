@@ -70,7 +70,7 @@ class BinaryTree {
     std::vector<T> in_order() const {
         auto vector = std::vector<T>{};
         if (!empty()) {
-            root->pre_order(vector);
+            root->in_order(vector);
         }
         return vector;
     }
@@ -79,7 +79,7 @@ class BinaryTree {
     std::vector<T> post_order() const {
         auto vector = std::vector<T>{};
         if (!empty()) {
-            root->pre_order(vector);
+            root->post_order(vector);
         }
         return vector;
     }
@@ -138,21 +138,21 @@ class BinaryTree {
         //! Normal order
         void in_order(std::vector<T>& v) const {
             if (left) {
-                left->pre_order(v);
+                left->in_order(v);
             }
             v.push_back(node_data);
             if (right) {
-                right->pre_order(v);
+                right->in_order(v);
             }
         }
 
         //! Post order
         void post_order(std::vector<T>& v) const {
             if (left) {
-                left->pre_order(v);
+                left->post_order(v);
             }
             if (right) {
-                right->pre_order(v);
+                right->post_order(v);
             }
             v.push_back(node_data);
         }
