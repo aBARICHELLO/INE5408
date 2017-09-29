@@ -1,6 +1,5 @@
 //  Copyright [2017] <Barichello>
 
-// 100.0
 #ifndef STRUCTURES_ARRAY_LIST_H
 #define STRUCTURES_ARRAY_LIST_H
 
