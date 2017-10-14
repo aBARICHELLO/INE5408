@@ -110,7 +110,14 @@ class BinaryTree {
 
         //! Remove
         bool remove(const T& data) {
-            return true;
+            if (data == node_data) {
+                node_data = T{};
+                return true;
+            } else if (data < node_data) {
+                return (left) and left->remove(data);
+            } else {
+                return (right) and right->remove(data);
+            }
         }
 
         //! Contains
