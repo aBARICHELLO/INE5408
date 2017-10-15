@@ -13,22 +13,48 @@ template<typename T>
 class AVLTree {
 public:
     //! Destructor
-    ~AVLTree();
+    ~AVLTree() {
+        while (!empty()) {
+            remove(root->node_data);
+        }
+    }
 
     //! Insert
-    void insert(const T& node_data);
+    void insert(const T& node_data) {
+        if (empty()) {
+            root = new Node(node_data);
+        } else {
+            root->insert(node_data);
+        }
+        ++size_;
+    }
 
     //! Remov
-    void remove(const T& node_data);
+    void remove(const T& node_data) {
+        if (empty()) {
+            throw std::out_of_range("Empty!");
+        }
+        root->remove(node_data);
+        --size_;
+    }
 
     //! Contains
-    bool contains(const T& node_data) const;
+    bool contains(const T& node_data) const {
+        if (empty()) {
+            return false;
+        }
+        return root->contains(node_data);
+    }
 
     //! Empty
-    bool empty() const;
+    bool empty() const {
+        return size_ == 0;
+    }
 
     //! Size
-    std::size_t size() const;
+    std::size_t size() const {
+        return size_;
+    }
 
     //! Pre order
     std::vector<T> pre_order() const {
@@ -117,19 +143,19 @@ private:
         }
 
         //! Height
-        void updateHeight() ;
+        void updateHeight();
 
         //! Simple left
-        Node* simpleLeft() ;
+        Node* simpleLeft();
 
         //! Simple right
-        Node* simpleRight() ;
+        Node* simpleRight();
 
         //! Double left
-        Node* doubleLeft() ;
+        Node* doubleLeft();
 
         //! Double right
-        Node* doubleRight() ;
+        Node* doubleRight();
 
         //! Pre order
         void pre_order(std::vector<T>& v) const {
@@ -143,7 +169,7 @@ private:
         }
 
         //! In order
-        void in_order(ArrayList<T>& v) const {
+        void in_order(std::vector<T>& v) const {
             if (left) {
                 left->pre_order(v);
             }
@@ -154,7 +180,7 @@ private:
         }
 
         //! Post order
-        void post_order(ArrayList<T>& v) const {
+        void post_order(std::vector<T>& v) const {
             if (left) {
                 left->pre_order(v);
             }
