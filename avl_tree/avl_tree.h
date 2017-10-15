@@ -30,6 +30,30 @@ public:
             root->insert(node_data);
         }
         ++size_;
+
+        int height_left, height_right;
+        root->update_height();
+        switch (root->balance_type()) {
+            case 0:
+                height_left = root->get_height(root->left);
+                height_right = root->get_height(root->right);
+                root->height = std::max(height_left, height_right) + 1;
+                break;
+            case 1:
+                root = root->simple_left();
+                break;
+            case 2:
+                root = root->double_left();
+                break;
+            case 3:
+                root = root->simple_right();
+                break;
+            case 4:
+                root = root->double_right();
+                break;
+            default:
+                break;
+        }
     }
 
     //! Remov
@@ -37,8 +61,19 @@ public:
         if (empty()) {
             throw std::out_of_range("Empty!");
         }
-        root->remove(node_data);
-        --size_;
+        
+        if (size() != 1) {
+            if (root->remove(node_data)) {
+                --size_;
+                int height_left, height_right;
+                root->update_height();
+                switch (root->balance_type()) {
+                    case 0:
+                        height_left = root->get_height(root->left);
+                        break;
+                }
+            }
+        }
     }
 
     //! Contains
@@ -91,12 +126,12 @@ private:
     struct Node {
         //! Node constructor
         explicit Node(const T& node_data):
-            node_data(node_data)
+            node_data{node_data}
         {}
 
         //! Node destructor
         ~Node() {
-            delete node_data;
+            //delete node_data;
             if (left != nullptr) {
                 delete left;
             }
@@ -104,17 +139,22 @@ private:
                 delete right;
             }
         }
+        
+        T node_data;
+        std::size_t height{0};
+        Node* left{nullptr};
+        Node* right{nullptr};
 
         //! Node insert
         void insert(const T& data_) {
             if (data_ <= node_data) {
-                if (left == nullptr) {
+                if (!left) {
                     left = new Node(data_);
                 } else {
                     left->insert(data_);
                 }
             } else {
-                if (right == nullptr) {
+                if (!right) {
                     right = new Node(data_);
                 } else {
                     right->insert(data_);
@@ -122,16 +162,72 @@ private:
             }
         }
 
+        Node* remove(const T& data, Node* arv, bool& deleted) {
+            deleted = false;
+            if (arv == nullptr)
+                return arv;
+            // Go to left
+            if (data < arv->node_data) {
+                arv->left = remove(data, arv->left, deleted);
+                return arv;
+            }
+            // Go to right
+            if (data > arv->node_data) {
+                arv->right = remove(data, arv->right, deleted);
+                return arv;
+            }
+            // I found
+            // Two sons
+            if (arv->right != nullptr && arv->left != nullptr) {
+                Node* temp = arv->right->minimum();
+                arv->node_data = temp->node_data;
+                arv->right = remove(data, arv->right, deleted);
+                return arv;
+            }
+            // One son or leaf
+            Node* temp = nullptr;
+            if (arv->right != nullptr)
+                temp = arv->right;
+            else
+                temp = arv->left;
+
+            arv->right = arv->left = nullptr;
+            delete arv;
+            deleted = true;
+            return temp;
+        }
+
         //! Node remove
         bool remove(const T& data_) {
-            if (data_ == node_data) {
-                node_data = T{};
-                return true;
-            } else if (data_ < node_data) {
-                return (left) and left->remove(data_);
-            } else {
-                return (right) and right->remove(data_);
+            bool deleted = false;
+            if (data_ < node_data && left != nullptr) {
+                left = remove(node_data, left, deleted);
+            } else if (data_ > node_data && right != nullptr) {
+                right = remove(node_data, right, deleted);
+            } else if (data_ == node_data) {
+                if (right != nullptr && left != nullptr) {
+                    Node* temp = right->minimum();
+                    node_data = temp->node_data;
+                    right = remove(node_data, right, deleted);
+                } else if (right != nullptr) {
+                    Node* temp = right->minimum();
+                    node_data = temp->node_data;
+                    right = temp->right;
+                    left = temp->left;
+                    temp->right = temp->left = nullptr;
+                    delete temp;
+                    deleted = true;
+                } else if (left != nullptr) {
+                    Node* temp = left;
+                    node_data = temp->node_data;
+                    right = temp->right;
+                    left = temp->left;
+                    temp->right = temp->left = nullptr;
+                    delete temp;
+                    deleted = true;
+                }
             }
+            return deleted;
         }
 
         //! Contains
@@ -145,27 +241,60 @@ private:
             }
         }
 
-        //! Height
+        //! Update height
         void update_height() {
-            std::size_t height_left, height_right;
-            if (!left && !right) {
+            int height_left, height_right;
+            if (left == nullptr && right == nullptr) {
                 height = 0;
             } else {
+                // Left side balancing
                 if (!left) {
-                    left->updateHeight();
+                    left->update_height();
                     switch (left->balance_type()) {
                         case 0: // Balanced, update heights
-                            height_left = height(left->left);
-                            height_right = height(left->right);
+                            height_left = get_height(left->left);
+                            height_right = get_height(left->right);
                             left->height = std::max(height_left, height_right) + 1;
                             break;
                         case 1: // Left left
+                            left = left->simple_left();
                             break;
                         case 2: // Left right
+                            left = left->double_left();
                             break;
                         case 3: // Right right
+                            left = left->simple_right();
                             break;
                         case 4: // Right right
+                            left = left->double_right();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                // Right side balancing
+                if (right) {
+                    right->update_height();
+                    switch (right->balance_type()) {
+                        case 0: // Balanced, update heights
+                            height_left = get_height(right->left);
+                            height_right = get_height(right->right);
+                            right->height = std::max(height_left, height_right) + 1;
+                            break;
+                        case 1: // Left left
+                            right = right->simple_left();
+                            break;
+                        case 2: // Left right
+                            right = right->double_left();
+                            break;
+                        case 3: // Right right
+                            right = right->simple_right();
+                            break;
+                        case 4: // Right right
+                            right = right->double_right();
+                            break;
+                        default:
                             break;
                     }
                 }
@@ -180,15 +309,15 @@ private:
         4 : Right-Left
         */
         std::size_t balance_type() {
-            if (height(left) - height(right) > 1) {
-                if (height(left->left) > height(left->right)) {
+            if (get_height(left) - get_height(right) > 1) {
+                if (get_height(left->left) > get_height(left->right)) {
                     return 1;
                 }
                 else {
                     return 2;
                 }
-            } else if (height(right) - height(left) > 1) {
-                if (height(right->right) > height(right->left)) {
+            } else if (get_height(right) - get_height(left) > 1) {
+                if (get_height(right->right) > get_height(right->left)) {
                     return 3;
                 } else {
                     return 4;
@@ -202,14 +331,21 @@ private:
             return node == nullptr ? -1 : node->height;
         }
 
+        Node* minimum() {
+            if (left == nullptr) {
+                return this;
+            }
+            return left->minimum();
+        }
+
         //! Simple left
         Node* simple_left() {
             Node* temp_node = left;
             left = temp_node->right;
             temp_node->right = this;
 
-            height = std::max(height(left), height(right) + 1);
-            temp_node->height = std::max(height(temp_node->left), height(this)) + 1;
+            height = std::max(get_height(left), get_height(right) + 1);
+            temp_node->height = std::max(get_height(temp_node->left), get_height(this)) + 1;
         }
 
         //! Simple right
@@ -218,8 +354,8 @@ private:
             right = temp_node->left;
             temp_node->left = this;
 
-            height = std::max(height(right), height(left) + 1);
-            temp_node->height = std::max(height(temp_node->right), height(this)) + 1;
+            height = std::max(get_height(right), get_height(left) + 1);
+            temp_node->height = std::max(get_height(temp_node->right), get_height(this)) + 1;
         }
 
         //! Double left
@@ -266,11 +402,6 @@ private:
             }
             v.push_back(node_data);
         }
-
-        T node_data;
-        std::size_t height;
-        Node* left{nullptr};
-        Node* right{nullptr};
     };
 
     Node* root{nullptr};
